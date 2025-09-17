@@ -9,6 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/api")
@@ -70,6 +73,15 @@ public class AttendanceController {
         }
     }
 
+
+    @PostMapping("/attendance")
+    public String postAttendance(@RequestBody AttendanceRecord record) {
+        //TODO: process POST request
+        System.out.println("Received attendance record: " + record);
+        //  firestoreService.saveAttendance(record);
+        return "Attendance recorded";
+    }
+    
     // Inner class for attendance statistics
     public static class AttendanceStats {
         private long totalRecords;

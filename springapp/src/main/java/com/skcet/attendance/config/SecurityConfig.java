@@ -35,7 +35,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 // ✅ For testing/dev: allow QR & attendance APIs without auth
                 .requestMatchers("/api/generate-qr").permitAll()
-                .requestMatchers("/api/list-attendance").permitAll()
+                .requestMatchers("/api/list-attendance" , "/**").permitAll()
 
                 // Keep others secured
                 .requestMatchers("/api/validate-qr", "/api/verify-face", "/api/student-attendance").authenticated()
