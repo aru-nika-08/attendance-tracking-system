@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "http://localhost:5173")
 public class QRController {
 
     private final TokenService tokenService;
@@ -26,11 +26,11 @@ public class QRController {
     private final Map<String, String> activeSessions = new HashMap<>();
 
     @GetMapping("/generate-qr")
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<QRGenerateResponse> generateQR() {
         try {
             String token = tokenService.generateToken();
-            long expiresAt = System.currentTimeMillis() + 5000; // 5 seconds
+            long expiresAt = System.currentTimeMillis() + tokenService.getQrTtlMs();
             
             log.info("Generated QR token: {}", token);
             

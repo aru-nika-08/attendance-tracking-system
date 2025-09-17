@@ -5,7 +5,8 @@ public class QRGenerateResponse {
     private String token;
     private long expiresAt;
     public QRGenerateResponse(String token2, long expiresAt2) {
-        //TODO Auto-generated constructor stub
+        this.token = token2;
+        this.expiresAt = expiresAt2;
     }
     public String getToken() {
         return token;
@@ -22,5 +23,3 @@ public class QRGenerateResponse {
 
     
 }
-
-

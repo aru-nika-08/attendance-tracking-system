@@ -33,9 +33,14 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/generate-qr").hasRole("ADMIN")
-                .requestMatchers("/api/list-attendance").hasRole("ADMIN")
+                // ✅ For testing/dev: allow QR & attendance APIs without auth
+                .requestMatchers("/api/generate-qr").permitAll()
+                .requestMatchers("/api/list-attendance").permitAll()
+
+                // Keep others secured
                 .requestMatchers("/api/validate-qr", "/api/verify-face", "/api/student-attendance").authenticated()
+
+                // Default rule
                 .anyRequest().permitAll()
             )
             .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -50,11 +55,9 @@ public class SecurityConfig {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
-
-

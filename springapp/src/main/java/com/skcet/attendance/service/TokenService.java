@@ -16,7 +16,7 @@ import java.util.UUID;
 @Slf4j
 public class TokenService {
 
-    @Value("${qr.ttl.ms:5000}")
+    @Value("${qr.ttl.ms}")
     private long qrTtlMs;
 
     private static final String HMAC_SHA256 = "HmacSHA256";
@@ -77,6 +77,9 @@ public class TokenService {
         byte[] signature = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
         return Base64.getEncoder().encodeToString(signature);
     }
+    public long getQrTtlMs() {
+    return qrTtlMs;
+}
 }
 
 
