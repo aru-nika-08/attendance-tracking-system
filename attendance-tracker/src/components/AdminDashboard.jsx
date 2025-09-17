@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { qrAPI, attendanceAPI } from '../services/api'
+import QRCode from "react-qr-code";
+
 import { 
   Container, 
   Paper, 
@@ -51,9 +53,12 @@ const AdminDashboard = () => {
     try {
       setQrLoading(true)
       const response = await qrAPI.generateQR()
-      setQrData(response.data)
+      const { token, expiresAt } = response.data;
+      const redirect =  (import.meta.env.VITE_ORIGIN_PATH || 'http://localhost:5173') + '/mark-attendance?token=' + token;
+      setQrData({ url: redirect });
     } catch (error) {
       setError('Failed to generate QR code')
+      setQrData({url: 'www.example.com', expiresAt: Date.now() + 60000})
     } finally {
       setQrLoading(false)
     }
@@ -146,26 +151,31 @@ const AdminDashboard = () => {
               <CircularProgress />
             ) : qrData ? (
               <Box>
-                <QrCode sx={{ fontSize: 200, color: 'primary.main' }} />
+                {/* <QrCode sx={{ fontSize: 200, color: 'primary.main' }} /> */}
+                <QRCode value={qrData.url} size={200} />
                 <Typography variant="body2" sx={{ mt: 1 }}>
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Expires: {formatDate(qrData.expiresAt)}
                 </Typography>
+                {/* <Typography variant="caption" display="block" color="text.secondary">
+                  URL: {qrData.url}
+                </Typography> */}
+                <a target='_blank' href={qrData.url} rel="noreferrer">Link</a>
               </Box>
             ) : (
               <Typography>No QR data available</Typography>
             )}
           </Box>
           
-          <Button
+          {/* <Button
             variant="outlined"
             startIcon={<Refresh />}
             onClick={generateQR}
             disabled={qrLoading}
           >
             Refresh QR Code
-          </Button>
+          </Button> */}
         </Paper>
 
         {/* Attendance Table */}

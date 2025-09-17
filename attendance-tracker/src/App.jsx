@@ -8,6 +8,7 @@ import QRScannerNative from './components/QRScannerNative'
 import FaceRecognition from './components/FaceRecognition'
 import AdminDashboard from './components/AdminDashboard'
 import StudentDashboard from './components/StudentDashboard'
+import MarkAttendance from './components/MarkAttendance'
 
 function App() {
   const { user, loading, isAdmin } = useAuth()
@@ -35,6 +36,7 @@ function App() {
 
       {/* Admin route */}
       <Route path="/admin" element={<AdminDashboard />} />
+      <Route path='/mark-attendance' element={<MarkAttendance />} />
 
       {/* Catch-all: redirect any unknown route to proper dashboard */}
       <Route path="*" element={<Navigate to={isAdmin() ? "/admin" : "/scan"} replace />} />
