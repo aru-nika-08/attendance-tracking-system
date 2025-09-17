@@ -42,7 +42,7 @@ const AdminDashboard = () => {
     loadAttendance()
     
     // Auto-refresh QR every 5 seconds
-    const qrInterval = setInterval(generateQR, 5000)
+    const qrInterval = setInterval(generateQR, 60000)
     
     return () => clearInterval(qrInterval)
   }, [])
@@ -138,7 +138,7 @@ const AdminDashboard = () => {
             Attendance QR Code
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Display this QR code for students to scan. It refreshes automatically every 5 seconds.
+            Display this QR code for students to scan. It refreshes automatically every 1 minute.
           </Typography>
           
           <Box sx={{ mb: 2 }}>
@@ -148,7 +148,6 @@ const AdminDashboard = () => {
               <Box>
                 <QrCode sx={{ fontSize: 200, color: 'primary.main' }} />
                 <Typography variant="body2" sx={{ mt: 1 }}>
-                  Token: {qrData.token}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Expires: {formatDate(qrData.expiresAt)}
