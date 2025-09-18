@@ -100,4 +100,25 @@ public ResponseEntity<QRValidateResponse> validateQR(@RequestBody QRValidateRequ
         activeSessions.remove(sessionId);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/attendance")
+public ResponseEntity<?> markAttendance(@RequestBody Map<String, String> body) {
+    String token = body.get("token");
+    try {
+        TokenService.AttendancePayload payload = tokenService.validateToken(token);
+
+        if (payload == null) {
+            return ResponseEntity.badRequest().body("Invalid or expired token");
+        }
+
+        // save attendance logic here
+        log.info("Attendance marked for Staff {} | Course {}", payload.getStaffName(), payload.getCourseName());
+
+        return ResponseEntity.ok("Attendance marked successfully");
+    } catch (Exception e) {
+        log.error("Error marking attendance: {}", e.getMessage());
+        return ResponseEntity.internalServerError().body("Error marking attendance");
+    }
+}
+
 }

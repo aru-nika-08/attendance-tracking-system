@@ -9,8 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import java.util.Map;
 
 
 @RestController
@@ -74,13 +73,23 @@ public class AttendanceController {
     }
 
 
-    @PostMapping("/attendance")
-    public String postAttendance(@RequestBody AttendanceRecord record) {
-        //TODO: process POST request
-        System.out.println("Received attendance record: " + record);
-        //  firestoreService.saveAttendance(record);
-        return "Attendance recorded";
+   @PostMapping("/attendance")
+public ResponseEntity<String> postAttendance(@RequestBody Map<String, Object> body) {
+    try {
+        String email = (String) body.get("email");
+        String sessionId = (String) body.get("sessionId");
+        Double confidence = body.get("confidence") != null ? ((Number) body.get("confidence")).doubleValue() : 1.0;
+
+        firestoreService.saveAttendance(email, sessionId, confidence);
+
+        log.info("Attendance recorded for student: {}", email);
+        return ResponseEntity.ok("Attendance recorded successfully");
+    } catch (Exception e) {
+        log.error("Failed to record attendance: {}", e.getMessage());
+        return ResponseEntity.internalServerError().body("Error recording attendance");
     }
+}
+
     
     // Inner class for attendance statistics
     public static class AttendanceStats {
