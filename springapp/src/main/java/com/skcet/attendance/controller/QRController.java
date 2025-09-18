@@ -1,5 +1,6 @@
 package com.skcet.attendance.controller;
 
+import com.skcet.attendance.dto.AttendanceInfo;
 import com.skcet.attendance.dto.QRGenerateResponse;
 import com.skcet.attendance.dto.QRValidateRequest;
 import com.skcet.attendance.dto.QRValidateResponse;
@@ -7,7 +8,6 @@ import com.skcet.attendance.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,54 +17,71 @@ import java.util.Map;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173") // Update if you access from mobile
 public class QRController {
 
     private final TokenService tokenService;
-    
-    // Store active sessions (in production, use Redis or database)
+
+    // Store active sessions (consider Redis for production)
     private final Map<String, String> activeSessions = new HashMap<>();
 
-    @GetMapping("/generate-qr")
-    //@PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<QRGenerateResponse> generateQR() {
-        try {
-            String token = tokenService.generateToken();
-            long expiresAt = System.currentTimeMillis() + tokenService.getQrTtlMs();
-            
-            log.info("Generated QR token: {}", token);
-            
-            return ResponseEntity.ok(new QRGenerateResponse(token, expiresAt));
-            
-        } catch (Exception e) {
-            log.error("Failed to generate QR token: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+    // --- Generate QR dynamically based on staff input ---
+    @PostMapping("/generate-qr")
+public ResponseEntity<QRGenerateResponse> generateQR(@RequestBody AttendanceInfo info) {
+    try {
+        // Pass all required info to the TokenService
+        String token = tokenService.generateToken(
+                String.valueOf(info.getStaffId()),
+                info.getStaffName(),
+                info.getSessionDate(),
+                info.getPeriod(),
+                info.getStartTime(),
+                info.getEndTime(),
+                String.valueOf(info.getCourseId()),
+                info.getCourseName(),
+                info.getLocation(),
+                info.getAttendanceType()
+        );
 
+        long expiresAt = System.currentTimeMillis() + tokenService.getQrTtlMs();
+
+        return ResponseEntity.ok(new QRGenerateResponse(token, expiresAt));
+    } catch (Exception e) {
+        log.error("Failed to generate QR token: {}", e.getMessage());
+        return ResponseEntity.internalServerError().build();
+    }
+}
+
+
+    // --- Validate QR scanned by student ---
     @PostMapping("/validate-qr")
-    public ResponseEntity<QRValidateResponse> validateQR(@RequestBody QRValidateRequest request) {
-        try {
-            boolean isValid = tokenService.validateToken(request.getToken());
-            
-            if (isValid) {
-                String sessionId = tokenService.generateSessionId();
-                activeSessions.put(sessionId, request.getEmail());
-                
-                log.info("QR validation successful for: {}", request.getEmail());
-                
-                return ResponseEntity.ok(new QRValidateResponse(true, sessionId));
-            } else {
-                log.warn("QR validation failed for: {}", request.getEmail());
-                return ResponseEntity.ok(new QRValidateResponse(false, null));
-            }
-            
-        } catch (Exception e) {
-            log.error("QR validation error: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
-    }
+public ResponseEntity<QRValidateResponse> validateQR(@RequestBody QRValidateRequest request) {
+    try {
+        // validateToken now returns AttendancePayload if valid, or null if invalid/expired
+        TokenService.AttendancePayload payload = tokenService.validateToken(request.getToken());
 
+        if (payload != null) {
+            // token is valid, create session
+            String sessionId = tokenService.generateSessionId();
+            activeSessions.put(sessionId, request.getEmail());
+
+            log.info("QR validation successful for: {} | Staff: {} | Class: {}",
+                     request.getEmail(), payload.getStaffName(), payload.getCourseName());
+
+            return ResponseEntity.ok(new QRValidateResponse(true, sessionId));
+        } else {
+            // token invalid or expired
+            log.warn("QR validation failed for: {}", request.getEmail());
+            return ResponseEntity.ok(new QRValidateResponse(false, null));
+        }
+
+    } catch (Exception e) {
+        log.error("QR validation error: {}", e.getMessage());
+        return ResponseEntity.internalServerError().build();
+    }
+}
+
+    // --- Session endpoints ---
     @GetMapping("/session/{sessionId}")
     public ResponseEntity<Map<String, String>> getSession(@PathVariable String sessionId) {
         String email = activeSessions.get(sessionId);
@@ -84,5 +101,3 @@ public class QRController {
         return ResponseEntity.ok().build();
     }
 }
-
-

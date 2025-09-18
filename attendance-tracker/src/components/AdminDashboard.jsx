@@ -21,10 +21,11 @@ import {
   TableRow,
   Chip,
   IconButton,
-  Tooltip
+  Tooltip,
+  TextField,
+  Grid
 } from '@mui/material'
 import { 
-  QrCode, 
   Refresh, 
   Download, 
   Logout,
@@ -39,26 +40,42 @@ const AdminDashboard = () => {
   const [qrLoading, setQrLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Form state
+  const [form, setForm] = useState({
+    staffId: '',
+    staffName: '',
+    className: '',
+    sessionDate: '',
+    period: '',
+    startTime: '',
+    endTime: '',
+    courseId: '',
+    courseName: '',
+    location: '',
+    attendanceType: ''
+  })
+
   useEffect(() => {
-    generateQR()
     loadAttendance()
-    
-    // Auto-refresh QR every 5 seconds
-    const qrInterval = setInterval(generateQR, 60000)
-    
-    return () => clearInterval(qrInterval)
   }, [])
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+  }
 
   const generateQR = async () => {
     try {
       setQrLoading(true)
-      const response = await qrAPI.generateQR()
+      setError('')
+      const response = await qrAPI.generateQR(form) // send form data to backend
       const { token, expiresAt } = response.data;
       const redirect =  (import.meta.env.VITE_ORIGIN_PATH || 'http://localhost:5173') + '/mark-attendance?token=' + token;
-      setQrData({ url: redirect });
+      setQrData({ url: redirect, expiresAt })
     } catch (error) {
+      console.error(error)
       setError('Failed to generate QR code')
-      setQrData({url: 'www.example.com', expiresAt: Date.now() + 60000})
+      setQrData(null)
     } finally {
       setQrLoading(false)
     }
@@ -136,14 +153,56 @@ const AdminDashboard = () => {
             {error}
           </Alert>
         )}
-        
+
+        {/* Form Section */}
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h5" gutterBottom>
+            Generate Attendance QR
+          </Typography>
+          <Grid container spacing={2}>
+            {[
+              { label: 'Staff ID', name: 'staffId' },
+              { label: 'Staff Name', name: 'staffName' },
+              { label: 'Class Name', name: 'className' },
+              { label: 'Session Date', name: 'sessionDate', type: 'date' },
+              { label: 'Period', name: 'period' },
+              { label: 'Start Time', name: 'startTime', type: 'time' },
+              { label: 'End Time', name: 'endTime', type: 'time' },
+              { label: 'Course ID', name: 'courseId' },
+              { label: 'Course Name', name: 'courseName' },
+              { label: 'Location', name: 'location' },
+              { label: 'Attendance Type', name: 'attendanceType' }
+            ].map((field, i) => (
+              <Grid item xs={12} sm={6} md={4} key={i}>
+                <TextField
+                  fullWidth
+                  label={field.label}
+                  name={field.name}
+                  type={field.type || 'text'}
+                  value={form[field.name]}
+                  onChange={handleInputChange}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Box mt={2}>
+            <Button
+              variant="contained"
+              onClick={generateQR}
+              disabled={qrLoading}
+            >
+              Generate QR
+            </Button>
+          </Box>
+        </Paper>
+
         {/* QR Code Section */}
         <Paper elevation={3} sx={{ p: 3, mb: 3, textAlign: 'center' }}>
           <Typography variant="h5" gutterBottom>
             Attendance QR Code
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Display this QR code for students to scan. It refreshes automatically every 1 minute.
+            Display this QR code for students to scan.
           </Typography>
           
           <Box sx={{ mb: 2 }}>
@@ -151,31 +210,18 @@ const AdminDashboard = () => {
               <CircularProgress />
             ) : qrData ? (
               <Box>
-                {/* <QrCode sx={{ fontSize: 200, color: 'primary.main' }} /> */}
                 <QRCode value={qrData.url} size={200} />
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Expires: {formatDate(qrData.expiresAt)}
                 </Typography>
-                {/* <Typography variant="caption" display="block" color="text.secondary">
-                  URL: {qrData.url}
-                </Typography> */}
-                <a target='_blank' href={qrData.url} rel="noreferrer">Link</a>
+                <Box>
+                  <a target='_blank' href={qrData.url} rel="noreferrer">Link</a>
+                </Box>
               </Box>
             ) : (
               <Typography>No QR data available</Typography>
             )}
           </Box>
-          
-          {/* <Button
-            variant="outlined"
-            startIcon={<Refresh />}
-            onClick={generateQR}
-            disabled={qrLoading}
-          >
-            Refresh QR Code
-          </Button> */}
         </Paper>
 
         {/* Attendance Table */}
@@ -260,5 +306,3 @@ const AdminDashboard = () => {
 }
 
 export default AdminDashboard
-
-

@@ -33,7 +33,7 @@ const getAuthToken = async () => {
 }
 
 export const qrAPI = {
-  generateQR: () => api.get('/api/generate-qr'),
+  generateQR: (data) => api.post('/api/generate-qr', data),
   validateQR: (data) => api.post('/api/validate-qr', data),
 }
 
