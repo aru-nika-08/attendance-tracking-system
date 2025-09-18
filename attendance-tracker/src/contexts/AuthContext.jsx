@@ -16,6 +16,9 @@ export const useAuth = () => {
   return context
 }
 
+// ✅ Whitelist of admin emails
+const ADMIN_EMAILS = ["727723euit216@skcet.ac.in"]
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -34,7 +37,7 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithPopup(auth, googleProvider)
       const user = result.user
       
-      // Check if email ends with @skcet.ac.in
+      // Restrict login only to @skcet.ac.in
       if (!user.email.endsWith('@skcet.ac.in')) {
         await signOut(auth)
         throw new Error('Only SKCET email addresses are allowed')
@@ -55,7 +58,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const isAdmin = () => {
-    return user && user.email && user.email.toLowerCase().includes('admin')
+    return user && ADMIN_EMAILS.includes(user.email.toLowerCase())
   }
 
   const value = {
@@ -72,5 +75,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   )
 }
-
-

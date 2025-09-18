@@ -85,9 +85,12 @@ const AdminDashboard = () => {
     try {
       setLoading(true)
       const response = await attendanceAPI.listAttendance()
-      setAttendance(response.data)
+      // Make sure attendance is always an array
+      const records = Array.isArray(response.data) ? response.data : response.data?.data || []
+      setAttendance(records)
     } catch (error) {
       setError('Failed to load attendance data')
+      setAttendance([])
     } finally {
       setLoading(false)
     }
@@ -160,7 +163,7 @@ const AdminDashboard = () => {
             Generate Attendance QR
           </Typography>
           <Grid container spacing={2}>
-            {[
+            {[ 
               { label: 'Staff ID', name: 'staffId' },
               { label: 'Staff Name', name: 'staffName' },
               { label: 'Class Name', name: 'className' },
@@ -267,13 +270,7 @@ const AdminDashboard = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {attendance.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} align="center">
-                        No attendance records found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
+                  {Array.isArray(attendance) && attendance.length > 0 ? (
                     attendance.map((record, index) => (
                       <TableRow key={index}>
                         <TableCell>{record.email}</TableCell>
@@ -294,6 +291,12 @@ const AdminDashboard = () => {
                         </TableCell>
                       </TableRow>
                     ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        No attendance records found
+                      </TableCell>
+                    </TableRow>
                   )}
                 </TableBody>
               </Table>

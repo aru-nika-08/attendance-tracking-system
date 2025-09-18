@@ -40,10 +40,12 @@ export const qrAPI = {
 export const faceAPI = {
   verifyFace: (data) => api.post('/api/verify-face', data),
 }
-
 export const attendanceAPI = {
-  listAttendance: () => api.get('/api/list-attendance'),
-  getStudentAttendance: (email) => api.get(`/api/student-attendance?email=${email}`),
+  getStudentAttendance: (email) => axios.get(`/attendance/student/${email}`),
+  listAttendance: () => axios.get('/attendance'),
+  markAttendance: (payload) => axios.post('/attendance/mark', payload),
+  getAllAttendance: () =>
+    axios.get(`${API_BASE}/list-attendance`)  // NEW
 }
 
 export default api

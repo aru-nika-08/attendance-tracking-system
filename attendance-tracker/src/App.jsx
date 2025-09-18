@@ -13,7 +13,8 @@ import MarkAttendance from './components/MarkAttendance'
 function App() {
   const { user, loading, isAdmin } = useAuth()
 
-  if (loading) {
+  // Wait until auth is fully ready
+  if (loading || user === undefined) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />
@@ -21,25 +22,28 @@ function App() {
     )
   }
 
+  // If not logged in
   if (!user) return <Login />
+
+  const admin = isAdmin()
 
   return (
     <Routes>
-      {/* Redirect root and /login to correct dashboard */}
-      <Route path="/" element={<Navigate to={isAdmin() ? "/admin" : "/scan"} replace />} />
-      <Route path="/login" element={<Navigate to={isAdmin() ? "/admin" : "/scan"} replace />} />
+      {/* Root redirect */}
+      <Route path="/" element={<Navigate to={admin ? "/admin" : "/student"} replace />} />
+      <Route path="/login" element={<Navigate to={admin ? "/admin" : "/student"} replace />} />
 
-      {/* Student routes */}
+      {/* Student routes (admins can also access) */}
+      <Route path="/student" element={<StudentDashboard />} />
       <Route path="/scan" element={<QRScannerNative />} />
       <Route path="/face" element={<FaceRecognition />} />
-      <Route path="/student" element={<StudentDashboard />} />
+      <Route path="/mark-attendance" element={<MarkAttendance />} />
 
-      {/* Admin route */}
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path='/mark-attendance' element={<MarkAttendance />} />
+      {/* Admin routes */}
+      <Route path="/admin" element={admin ? <AdminDashboard /> : <Navigate to="/student" replace />} />
 
-      {/* Catch-all: redirect any unknown route to proper dashboard */}
-      <Route path="*" element={<Navigate to={isAdmin() ? "/admin" : "/scan"} replace />} />
+      {/* Catch-all unknown route */}
+      <Route path="*" element={<Navigate to={admin ? "/admin" : "/student"} replace />} />
     </Routes>
   )
 }

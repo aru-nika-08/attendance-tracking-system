@@ -101,7 +101,7 @@ public ResponseEntity<QRValidateResponse> validateQR(@RequestBody QRValidateRequ
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/attendance")
+    @PostMapping("/mark-attendance")
 public ResponseEntity<?> markAttendance(@RequestBody Map<String, String> body) {
     String token = body.get("token");
     try {

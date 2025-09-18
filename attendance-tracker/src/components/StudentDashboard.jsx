@@ -24,7 +24,6 @@ import {
 import { 
   QrCodeScanner, 
   History, 
-  Logout,
   CheckCircle,
   Schedule,
   Cancel
@@ -33,7 +32,7 @@ import {
 const StudentDashboard = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [attendance, setAttendance] = useState([])
+  const [attendance, setAttendance] = useState([]) // always array
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stats, setStats] = useState({
@@ -51,17 +50,19 @@ const StudentDashboard = () => {
     try {
       setLoading(true)
       const response = await attendanceAPI.getStudentAttendance(user.email)
-      setAttendance(response.data)
-      
-      // Calculate stats
-      const total = response.data.length
-      const present = response.data.filter(r => r.status === 'present').length
-      const late = response.data.filter(r => r.status === 'late').length
-      const absent = response.data.filter(r => r.status === 'absent').length
-      
+      const dataArray = Array.isArray(response.data) ? response.data : [] // ✅ ensure array
+      setAttendance(dataArray)
+
+      // Calculate stats safely
+      const total = dataArray.length
+      const present = dataArray.filter(r => r.status === 'present').length
+      const late = dataArray.filter(r => r.status === 'late').length
+      const absent = dataArray.filter(r => r.status === 'absent').length
       setStats({ total, present, late, absent })
-    } catch (error) {
+    } catch (err) {
+      console.error(err)
       setError('Failed to load attendance data')
+      setAttendance([])
     } finally {
       setLoading(false)
     }
@@ -213,7 +214,7 @@ const StudentDashboard = () => {
             <Box display="flex" justifyContent="center" p={3}>
               <CircularProgress />
             </Box>
-          ) : attendance.length === 0 ? (
+          ) : !Array.isArray(attendance) || attendance.length === 0 ? (
             <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
               No attendance records found
             </Typography>
@@ -253,5 +254,3 @@ const StudentDashboard = () => {
 }
 
 export default StudentDashboard
-
-
