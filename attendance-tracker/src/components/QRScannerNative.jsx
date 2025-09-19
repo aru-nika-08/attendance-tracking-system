@@ -1,8 +1,7 @@
-// QRScannerNative.jsx
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { qrAPI } from '../services/api'
+import { attendanceAPI } from '../services/api'
 import { 
   Container, 
   Paper, 
@@ -33,12 +32,14 @@ const QRScannerNative = () => {
   const [cameraError, setCameraError] = useState(false)
   const [success, setSuccess] = useState(false)
 
+  // stop camera on unmount
   useEffect(() => {
     return () => {
       if (stream) stream.getTracks().forEach(track => track.stop())
     }
   }, [stream])
 
+  // scanning loop
   useEffect(() => {
     let interval
     if (scanning && videoRef.current) {
@@ -49,6 +50,7 @@ const QRScannerNative = () => {
     return () => clearInterval(interval)
   }, [scanning])
 
+  // start camera
   const startCamera = async () => {
     try {
       setCameraError(false)
@@ -66,12 +68,14 @@ const QRScannerNative = () => {
     }
   }
 
+  // stop camera
   const stopCamera = () => {
     if (stream) stream.getTracks().forEach(track => track.stop())
     setStream(null)
     setScanning(false)
   }
 
+  // detect QR code from video
   const detectQR = () => {
     if (!videoRef.current || !canvasRef.current) return
     const video = videoRef.current
@@ -83,53 +87,46 @@ const QRScannerNative = () => {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const code = jsQR(imageData.data, imageData.width, imageData.height)
     if (code) {
-      setScanning(false) // stop scanning while validating
+      setScanning(false) // pause scanning
       handleQRDetection(code.data)
     }
   }
 
+  // handle QR token
   const handleQRDetection = async (qrData) => {
     if (!qrData || loading) return
     setLoading(true)
     setError('')
 
     try {
-      // 1️⃣ Validate QR
-      const response = await qrAPI.validateQR({
-        token: qrData,
-        email: user.email
+      // 1️⃣ Mark attendance in backend
+      await attendanceAPI.post("/mark", null, {
+        params: {
+          studentEmail: user.email,
+          token: qrData
+        }
       })
 
-      if (response.data.valid) {
-        // 2️⃣ Store sessionId
-        sessionStorage.setItem('sessionId', response.data.sessionId)
+      // 2️⃣ Optionally reload attendance (store in sessionStorage or context)
+      const response = await attendanceAPI.get(`/student/${user.email}`)
+      sessionStorage.setItem('attendance', JSON.stringify(response.data))
 
-        // 3️⃣ Automatically mark attendance
-        await qrAPI.markAttendance({
-          sessionId: response.data.sessionId,
-          email: user.email
-        })
+      // 3️⃣ Show success snackbar
+      setSuccess(true)
 
-        // 4️⃣ Show success snackbar
-        setSuccess(true)
+      // 4️⃣ Redirect to student dashboard after short delay
+      setTimeout(() => navigate('/student'), 1500)
 
-        // 5️⃣ Redirect to student dashboard after short delay
-        setTimeout(() => {
-          navigate('/student')
-        }, 1500)
-      } else {
-        setError('Invalid QR code. Please try again.')
-        setScanning(true) // allow retry
-      }
     } catch (err) {
       console.error(err)
-      setError('Failed to validate QR code. Please try again.')
-      setScanning(true) // allow retry
+      setError('Failed to mark attendance. Please try again.')
+      setScanning(true)
     } finally {
       setLoading(false)
     }
   }
 
+  // handle manual QR token input
   const handleManualSubmit = async () => {
     if (!manualToken.trim()) {
       setError('Please enter a QR token')
@@ -139,40 +136,27 @@ const QRScannerNative = () => {
   }
 
   const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (err) {
-      console.error('Logout error:', err)
-    }
+    try { await logout() } 
+    catch (err) { console.error('Logout error:', err) }
   }
 
   return (
     <Box>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Scan QR Code
-          </Typography>
-          <Button color="inherit" onClick={handleLogout}>
-            Logout
-          </Button>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>Scan QR Code</Typography>
+          <Button color="inherit" onClick={handleLogout}>Logout</Button>
         </Toolbar>
       </AppBar>
 
       <Container maxWidth="md" sx={{ mt: 2 }}>
         <Paper elevation={3} sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h5" gutterBottom>
-            Scan Attendance QR Code
-          </Typography>
+          <Typography variant="h5" gutterBottom>Scan Attendance QR Code</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Use the camera to scan QR codes or enter the token manually
           </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
+          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           {!showManualInput ? (
             <Box>
@@ -201,7 +185,7 @@ const QRScannerNative = () => {
               {loading && (
                 <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <CircularProgress />
-                  <Typography variant="body2" sx={{ mt: 1 }}>Validating QR code...</Typography>
+                  <Typography variant="body2" sx={{ mt: 1 }}>Processing QR...</Typography>
                 </Box>
               )}
             </Box>

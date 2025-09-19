@@ -28,17 +28,11 @@ import {
   Schedule,
   Cancel
 } from '@mui/icons-material'
-import { toast } from 'react-toastify'
-const markAttendance = async (token) =>{
-  return new Promise((resolve , reject)=>{
-    setTimeout(()=>{resolve("attendance marked")} , 2000);
-  })
-}
+
 const StudentDashboard = () => {
-   const {token} = Object.fromEntries(new URLSearchParams(window.location.search));
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [attendance, setAttendance] = useState([]) // always array
+  const [attendance, setAttendance] = useState([]) 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [stats, setStats] = useState({
@@ -51,22 +45,14 @@ const StudentDashboard = () => {
   useEffect(() => {
     loadAttendance()
   }, [])
-  useEffect(()=>{
-    async function mark() {
-      await markAttendance(token);
-      toast.success("attendance marked");
-    }
-    mark()
-  } , [])
 
   const loadAttendance = async () => {
     try {
       setLoading(true)
       const response = await attendanceAPI.getStudentAttendance(user.email)
-      const dataArray = Array.isArray(response.data) ? response.data : [] // ✅ ensure array
+      const dataArray = Array.isArray(response.data) ? response.data : [] 
       setAttendance(dataArray)
 
-      // Calculate stats safely
       const total = dataArray.length
       const present = dataArray.filter(r => r.status === 'present').length
       const late = dataArray.filter(r => r.status === 'late').length
@@ -170,13 +156,10 @@ const StudentDashboard = () => {
                 <Typography color="text.secondary" gutterBottom>
                   Total Classes
                 </Typography>
-                <Typography variant="h4">
-                  {stats.total}
-                </Typography>
+                <Typography variant="h4">{stats.total}</Typography>
               </CardContent>
             </Card>
           </Grid>
-          
           <Grid item xs={12} sm={6} md={3}>
             <Card>
               <CardContent sx={{ textAlign: 'center' }}>
@@ -189,7 +172,6 @@ const StudentDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          
           <Grid item xs={12} sm={6} md={3}>
             <Card>
               <CardContent sx={{ textAlign: 'center' }}>
@@ -202,7 +184,6 @@ const StudentDashboard = () => {
               </CardContent>
             </Card>
           </Grid>
-          
           <Grid item xs={12} sm={6} md={3}>
             <Card>
               <CardContent sx={{ textAlign: 'center' }}>
@@ -243,7 +224,7 @@ const StudentDashboard = () => {
                       primary={
                         <Box display="flex" alignItems="center" gap={1}>
                           <Typography variant="body1">
-                            {formatDate(record.timestamp)}
+                            {formatDate(record.markedAt)}
                           </Typography>
                           <Chip 
                             label={record.status} 
@@ -252,7 +233,7 @@ const StudentDashboard = () => {
                           />
                         </Box>
                       }
-                      secondary={record.className || 'Class Attendance'}
+                      secondary={record.courseName || 'Class Attendance'}
                     />
                   </ListItem>
                   {index < attendance.length - 1 && <Divider />}

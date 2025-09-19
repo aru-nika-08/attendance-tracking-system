@@ -70,7 +70,7 @@ const AdminDashboard = () => {
       setError('')
       const response = await qrAPI.generateQR(form) // send form data to backend
       const { token, expiresAt } = response.data;
-      const redirect =  (import.meta.env.VITE_ORIGIN_PATH || 'http://localhost:5173') + '/student?token=' + token;
+      const redirect =  (import.meta.env.VITE_ORIGIN_PATH || 'https://localhost:5173') + '/student?token=' + token;
       setQrData({ url: redirect, expiresAt })
     } catch (error) {
       console.error(error)
