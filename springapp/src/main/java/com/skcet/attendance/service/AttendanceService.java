@@ -23,7 +23,7 @@ public class AttendanceService {
         // Copy QR payload into attendance record
         attendance.setStaffId(payload.getStaffId());
         attendance.setStaffName(payload.getStaffName());
-        attendance.setClassName(payload.getClassName());
+        attendance.setClassName(payload.getClassName()); // ✅ Now works
         attendance.setSessionDate(payload.getSessionDate());
         attendance.setPeriod(payload.getPeriod());
         attendance.setStartTime(payload.getStartTime());

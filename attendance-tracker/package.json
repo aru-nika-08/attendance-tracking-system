@@ -8,6 +8,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.0",
     "@mui/material": "^5.15.0",
+    "@yudiel/react-qr-scanner": "^2.3.1",
     "axios": "^1.6.0",
     "base-64": "^1.0.0",
     "firebase": "^10.7.0",
@@ -16,6 +17,7 @@
     "react-dom": "^18.3.1",
     "react-qr-barcode-scanner": "^2.1.10",
     "react-qr-code": "^2.0.18",
+    "react-qr-reader": "^3.0.0-beta-1",
     "react-router-dom": "^6.20.0",
     "react-toastify": "^11.0.5",
     "workbox-window": "^7.0.0"

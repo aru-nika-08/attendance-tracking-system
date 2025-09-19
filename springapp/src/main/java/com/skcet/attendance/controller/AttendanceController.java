@@ -4,6 +4,9 @@ import com.skcet.attendance.dto.AttendanceRecord;
 import com.skcet.attendance.service.FirestoreService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +23,7 @@ import java.util.Map;
 public class AttendanceController {
 
     private final FirestoreService firestoreService;
-
+private static final Logger log = LoggerFactory.getLogger(FaceController.class);
     // === ADMIN ONLY ===
     @GetMapping("/list-attendance")
     @PreAuthorize("hasRole('ADMIN')")

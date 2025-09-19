@@ -29,7 +29,7 @@ public class TokenService {
     public String generateToken(String staffId, String staffName, String sessionDate,
                                 String period, String startTime, String endTime,
                                 String courseId, String courseName, String location,
-                                String attendanceType) {
+                                String attendanceType, String className) {
         try {
             long timestamp = System.currentTimeMillis();
             String randomId = UUID.randomUUID().toString().substring(0, 8);
@@ -37,7 +37,8 @@ public class TokenService {
             // Build JSON payload
             AttendancePayload payloadObj = new AttendancePayload(
                     timestamp, randomId, staffId, staffName, sessionDate,
-                    period, startTime, endTime, courseId, courseName, location, attendanceType
+                    period, startTime, endTime, courseId, courseName,
+                    location, attendanceType, className
             );
 
             String payloadJson = objectMapper.writeValueAsString(payloadObj);
@@ -45,10 +46,8 @@ public class TokenService {
             String signature = generateSignature(payloadJson);
 
             // Combine payload and signature
-            String token = Base64.getEncoder()
+            return Base64.getEncoder()
                     .encodeToString((payloadJson + "_" + signature).getBytes(StandardCharsets.UTF_8));
-
-            return token;
 
         } catch (Exception e) {
             log.error("Failed to generate token: {}", e.getMessage());
@@ -57,38 +56,36 @@ public class TokenService {
     }
 
     // Validate token and return payload if valid
-    // TokenService.java
-public AttendancePayload validateToken(String token) {
-    try {
-        String decoded = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
-        int splitIndex = decoded.lastIndexOf("_");
-        if (splitIndex == -1) return null;
+    public AttendancePayload validateToken(String token) {
+        try {
+            String decoded = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+            int splitIndex = decoded.lastIndexOf("_");
+            if (splitIndex == -1) return null;
 
-        String payloadJson = decoded.substring(0, splitIndex);
-        String signature = decoded.substring(splitIndex + 1);
+            String payloadJson = decoded.substring(0, splitIndex);
+            String signature = decoded.substring(splitIndex + 1);
 
-        // Verify signature
-        if (!signature.equals(generateSignature(payloadJson))) {
+            // Verify signature
+            if (!signature.equals(generateSignature(payloadJson))) {
+                return null;
+            }
+
+            // Parse JSON
+            AttendancePayload payload = objectMapper.readValue(payloadJson, AttendancePayload.class);
+
+            // Check TTL
+            long now = System.currentTimeMillis();
+            if ((now - payload.getTimestamp()) > qrTtlMs) {
+                return null;
+            }
+
+            return payload; // return payload if valid
+
+        } catch (Exception e) {
+            log.error("Token validation failed: {}", e.getMessage());
             return null;
         }
-
-        // Parse JSON
-        AttendancePayload payload = objectMapper.readValue(payloadJson, AttendancePayload.class);
-
-        // Check TTL
-        long now = System.currentTimeMillis();
-        if ((now - payload.getTimestamp()) > qrTtlMs) {
-            return null;
-        }
-
-        return payload; // return payload if valid
-
-    } catch (Exception e) {
-        log.error("Token validation failed: {}", e.getMessage());
-        return null;
     }
-}
-
 
     public String generateSessionId() {
         return UUID.randomUUID().toString();
@@ -121,12 +118,14 @@ public AttendancePayload validateToken(String token) {
         private String courseName;
         private String location;
         private String attendanceType;
+        private String className; // ✅ Added
 
         public AttendancePayload() {}
 
         public AttendancePayload(long timestamp, String randomId, String staffId, String staffName,
                                  String sessionDate, String period, String startTime, String endTime,
-                                 String courseId, String courseName, String location, String attendanceType) {
+                                 String courseId, String courseName, String location,
+                                 String attendanceType, String className) {
             this.timestamp = timestamp;
             this.randomId = randomId;
             this.staffId = staffId;
@@ -139,6 +138,7 @@ public AttendancePayload validateToken(String token) {
             this.courseName = courseName;
             this.location = location;
             this.attendanceType = attendanceType;
+            this.className = className;
         }
 
         // Getters
@@ -154,5 +154,6 @@ public AttendancePayload validateToken(String token) {
         public String getCourseName() { return courseName; }
         public String getLocation() { return location; }
         public String getAttendanceType() { return attendanceType; }
+        public String getClassName() { return className; } // ✅ Getter added
     }
 }
