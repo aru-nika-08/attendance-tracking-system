@@ -9,6 +9,7 @@ import FaceRecognition from './components/FaceRecognition'
 import AdminDashboard from './components/AdminDashboard'
 import StudentDashboard from './components/StudentDashboard'
 import MarkAttendance from './components/MarkAttendance'
+import { ToastContainer } from 'react-toastify'
 
 function App() {
   const { user, loading, isAdmin } = useAuth()
@@ -28,6 +29,7 @@ function App() {
   const admin = isAdmin()
 
   return (
+    <div>
     <Routes>
       {/* Root redirect */}
       <Route path="/" element={<Navigate to={admin ? "/admin" : "/student"} replace />} />
@@ -40,11 +42,13 @@ function App() {
       <Route path="/mark-attendance" element={<MarkAttendance />} />
 
       {/* Admin routes */}
-      <Route path="/admin" element={admin ? <AdminDashboard /> : <Navigate to="/student" replace />} />
-
+      {/* <Route path="/admin" element={admin ? <AdminDashboard /> : <Navigate to="/student" replace />} /> */}
+<Route path='admin' element={<AdminDashboard />} />
       {/* Catch-all unknown route */}
       <Route path="*" element={<Navigate to={admin ? "/admin" : "/student"} replace />} />
     </Routes>
+    <ToastContainer />
+    </div>
   )
 }
 

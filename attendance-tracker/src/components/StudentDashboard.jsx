@@ -28,8 +28,14 @@ import {
   Schedule,
   Cancel
 } from '@mui/icons-material'
-
+import { toast } from 'react-toastify'
+const markAttendance = async (token) =>{
+  return new Promise((resolve , reject)=>{
+    setTimeout(()=>{resolve("attendance marked")} , 2000);
+  })
+}
 const StudentDashboard = () => {
+   const {token} = Object.fromEntries(new URLSearchParams(window.location.search));
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [attendance, setAttendance] = useState([]) // always array
@@ -45,6 +51,13 @@ const StudentDashboard = () => {
   useEffect(() => {
     loadAttendance()
   }, [])
+  useEffect(()=>{
+    async function mark() {
+      await markAttendance(token);
+      toast.success("attendance marked");
+    }
+    mark()
+  } , [])
 
   const loadAttendance = async () => {
     try {

@@ -37,14 +37,23 @@ export default defineConfig({
     })
   ],
   server: {
+    host: '0.0.0.0',
     port: 5173,
-    host: true,
-    // SPA fallback for React Router
+    strictPort: true,   // 🚀 force 5173
+    open: false,       // 🚀 no auto-open
+    allowedHosts: ['982b44f9995b.ngrok-free.app'   // 👈 add your ngrok domain here
+    ],
     fs: {
       strict: false
     }
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@mui/material', '@mui/icons-material']
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      '@mui/material',
+      '@mui/icons-material'
+    ]
   }
 })
