@@ -11,10 +11,8 @@ const QRScannerNative = () => {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const handleResult = async (result, scanError) => {
-    if (scanError) return; // ignore scanning noise
+  const handleResult = async (result) => {
     if (!result) return;
-
     const token = result?.text || result;
     if (!token) {
       setError('QR did not contain a token');
@@ -23,10 +21,7 @@ const QRScannerNative = () => {
 
     try {
       setBusy(true);
-      // Mark attendance via backend
       await attendanceAPI.markAttendance(user.email, token);
-
-      // Redirect to dashboard with token param to trigger refresh
       navigate(`/dashboard?token=${token}`);
     } catch (err) {
       console.error('Mark attendance failed', err);
@@ -44,14 +39,12 @@ const QRScannerNative = () => {
         <QrReader
           constraints={{ facingMode: 'environment' }}
           scanDelay={500}
-          onResult={(result, e) => { if (result) handleResult(result); }}
+          onResult={(result) => { if (result) handleResult(result); }}
           containerStyle={{ width: '100%' }}
         />
       </Box>
       <Box sx={{ mt: 2 }}>
-        <Button variant="contained" disabled={busy} onClick={() => navigate('/dashboard')}>
-          Cancel
-        </Button>
+        <Button variant="contained" disabled={busy} onClick={() => navigate('/dashboard')}>Cancel</Button>
       </Box>
     </Box>
   );

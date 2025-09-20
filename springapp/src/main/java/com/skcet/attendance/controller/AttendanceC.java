@@ -2,61 +2,82 @@ package com.skcet.attendance.controller;
 
 import com.skcet.attendance.Entity.Attendance;
 import com.skcet.attendance.service.AttendanceService;
-import com.skcet.attendance.service.TokenService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance")
 @CrossOrigin(origins = "http://localhost:5173")
 public class AttendanceC {
 
-    private final AttendanceService service;
-    private final TokenService tokenService;
+    @Autowired
+    private AttendanceService attendanceService;
 
-    private static final Logger log = LoggerFactory.getLogger(AttendanceC.class);
-
-    public AttendanceC(AttendanceService service, TokenService tokenService) {
-        this.service = service;
-        this.tokenService = tokenService;
+    // ---------------------------
+    // 1️⃣ Stats endpoints
+    // ---------------------------
+    @GetMapping("/stats/{studentEmail}")
+    public ResponseEntity<Map<String, Integer>> getStats(@PathVariable String studentEmail) {
+        Map<String, Integer> stats = attendanceService.getStatsForStudent(studentEmail);
+        return ResponseEntity.ok(stats);
     }
 
-    // POST endpoint for QR scanning
+    @GetMapping("/student/{studentEmail}/summary")
+    public ResponseEntity<Map<String, Integer>> getStudentSummary(@PathVariable String studentEmail) {
+        Map<String, Integer> stats = attendanceService.getStatsForStudent(studentEmail);
+        return ResponseEntity.ok(stats);
+    }
+
+    // ---------------------------
+    // 2️⃣ Existing mark endpoint
+    // ---------------------------
     @PostMapping("/mark")
-    public Attendance markAttendance(@RequestParam String studentEmail,
-                                     @RequestParam String token) {
-        TokenService.AttendancePayload payload = tokenService.validateToken(token);
-        if (payload == null) {
-            log.warn("Invalid or expired QR token for student {}", studentEmail);
-            throw new RuntimeException("Invalid or expired QR token");
+    public ResponseEntity<String> markAttendance(@RequestBody Attendance request) {
+        boolean success = attendanceService.markAttendance(
+                request.getStudentEmail(),
+                request.getStaffId(),
+                request.getStaffName(),
+                request.getClassName(),
+                request.getSessionDate(),
+                request.getPeriod(),
+                request.isPresent()
+        );
+        if (success) {
+            return ResponseEntity.ok("Attendance marked successfully");
+        } else {
+            return ResponseEntity.badRequest().body("Failed to mark attendance");
         }
-        log.info("Saving attendance for {} | course: {} | class: {}", studentEmail, payload.getCourseId(), payload.getClassName());
-        return service.saveAttendance(studentEmail, payload);
     }
 
-    // GET endpoint to allow clickable links
-    @GetMapping("/scan")
-    public RedirectView scanAttendance(@RequestParam String email, @RequestParam String token) {
-        TokenService.AttendancePayload payload = tokenService.validateToken(token);
-        if (payload != null) {
-            service.saveAttendance(email, payload);
+    // ---------------------------
+    // 3️⃣ New endpoint: mark via token
+    // ---------------------------
+    @PostMapping("/mark/token")
+    public ResponseEntity<String> markAttendanceByToken(
+            @RequestParam String token,
+            @RequestParam String studentEmail) {
+        try {
+            boolean success = attendanceService.markAttendanceFromToken(studentEmail, token);
+            if (success) {
+                return ResponseEntity.ok("Attendance marked successfully");
+            } else {
+                return ResponseEntity.badRequest().body("Failed to mark attendance");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid token or attendance already marked");
         }
-        // Redirect to frontend dashboard
-        return new RedirectView("http://localhost:5173/dashboard");
     }
+    @GetMapping("/admin/class")
+public ResponseEntity<List<Attendance>> getClassAttendance(
+        @RequestParam String className,
+        @RequestParam String date,
+        @RequestParam String period) {
+    List<Attendance> list = attendanceService.getClassAttendance(className, date, period);
+    return ResponseEntity.ok(list);
+}
 
-    @GetMapping("/student/{email}")
-    public List<Attendance> getStudentAttendance(@PathVariable String email) {
-        return service.getAttendanceByStudent(email);
-    }
-
-    @GetMapping("/all")
-    public List<Attendance> getAllAttendance() {
-        return service.getAllAttendance();
-    }
 }

@@ -1,53 +1,55 @@
-// services/api.js
-import axios from 'axios'
-// Base URL from environment variables
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
-// Main axios instance
+import axios from 'axios';
+
+// Use backend URL from .env
+const BASE_URL = import.meta.env.VITE_BACKEND_URL + '/api';
+
 const api = axios.create({
   baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-// Attach Firebase JWT token automatically
-api.interceptors.request.use(async (config) => {
-  const token = localStorage.getItem('firebaseToken') // store Firebase JWT on login
-  if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`
-  }
-  return config
-}, (error) => Promise.reject(error))
-/* ---------------- Attendance API ---------------- */
+  headers: { 'Content-Type': 'application/json' }
+});
+
+// Attach Firebase JWT token if available
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('firebaseToken');
+  if (token) config.headers['Authorization'] = `Bearer ${token}`;
+  return config;
+}, error => Promise.reject(error));
+
+// ---------------- Attendance API ----------------
 export const attendanceAPI = {
-  markAttendance: (studentEmail, token) =>
-    api.post(`/attendance/mark`, null, { params: { studentEmail, token } }),
+  // ✅ Token-based attendance marking
+  markAttendanceToken: (studentEmail, token) =>
+    api.post('/attendance/mark/token', null, { params: { token, studentEmail } }),
 
+  // Optional: old markAttendance endpoint
+  markAttendance: (studentEmail, staffId, staffName, className, sessionDate, period, present) =>
+    api.post('/attendance/mark', { studentEmail, staffId, staffName, className, sessionDate, period, present }),
+
+  // Fetch student attendance summary
   getStudentAttendance: (email) =>
-    api.get(`/attendance/student/${encodeURIComponent(email)}`),
+    api.get(`/attendance/student/${encodeURIComponent(email)}/summary`),
 
-  getCourseAttendance: (courseId, date) =>
-    api.get(`/attendance/course/${encodeURIComponent(courseId)}`, { params: { date } }),
+  // Admin endpoints
+  getClassAttendance: (className, date, period) =>
+    api.get('/attendance/admin/class', { params: { className, date, period } }),
 
-  getAllAttendance: () => api.get('/attendance/all'),
+  listAttendance: () =>
+    api.get('/attendance/admin/class', { params: {} })
+};
 
-  // Alias for AdminDashboard.jsx
-  listAttendance: () => api.get('/attendance/all')
-}
-/* ---------------- QR API ---------------- */
+// ---------------- QR API ----------------
 export const qrAPI = {
   generateQR: (data) =>
-    api.post(`/qr/generate`, data),
+    api.post('/qr/generate', data)
+};
 
-  scanQR: (qrData) =>
-    api.post(`/qr/scan`, { qrData })
-}
-/* ---------------- Face Recognition API ---------------- */
+//---------------- Face Recognition API ----------------
 export const faceAPI = {
   registerFace: (studentId, image) =>
-    api.post(`/face/register`, { studentId, image }),
+    api.post('/face/register', { studentId, image }),
 
   verifyFace: (studentId, image) =>
-    api.post(`/face/verify`, { studentId, image })
-}
-/* ---------------- Default Export ---------------- */
-export default api
+    api.post('/face/verify', { studentId, image })
+};
+
+export default api;

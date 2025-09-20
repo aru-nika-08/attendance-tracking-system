@@ -2,11 +2,25 @@ package com.skcet.attendance.Repo;
 
 import com.skcet.attendance.Entity.Attendance;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+@Repository
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
+
+    // Total classes recorded for a student
+    int countByStudentEmail(String studentEmail);
+
+    // Count present classes
+    int countByStudentEmailAndPresentTrue(String studentEmail);
+
+    // Count absent classes
+    int countByStudentEmailAndPresentFalse(String studentEmail);
+
+    // Optional: fetch all attendance for a student
     List<Attendance> findByStudentEmail(String studentEmail);
-    Optional<Attendance> findByEmailAndClassNameAndSessionDate(String email, String className, String sessionDate);
+
+    List<Attendance> findByClassNameAndSessionDateAndPeriod(String className, String sessionDate, String period);
 
 }
