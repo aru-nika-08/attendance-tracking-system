@@ -214,7 +214,7 @@ const AdminDashboard = () => {
                   {attendance.length ? attendance.map((r,i)=>(
                     <TableRow key={i}>
                       <TableCell>{r.studentEmail}</TableCell>
-                      <TableCell>{new Date(r.markedAt).toLocaleString()}</TableCell>
+                      <TableCell>{r.sessionDate}</TableCell>
                       <TableCell>
                         <Chip label={r.status || (r.present?'present':'absent')} color={r.present?'success':r.status==='late'?'warning':'error'} size="small"/>
                       </TableCell>
