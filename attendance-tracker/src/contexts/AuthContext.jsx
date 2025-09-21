@@ -16,7 +16,7 @@ export const useAuth = () => {
   return context
 }
 
-const ADMIN_EMAILS = ["727723euit235@skcet.ac.in"]
+const ADMIN_EMAILS = ["727723euit216@skcet.ac.in"]
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
