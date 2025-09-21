@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }) => {
       // Development: use popup for convenience
       const result = await signInWithPopup(auth, googleProvider)
       const u = result.user
+    
 
       if (!u.email.endsWith('@skcet.ac.in')) {
         await signOut(auth)
@@ -77,6 +78,8 @@ export const AuthProvider = ({ children }) => {
       }
 
       setUser(u)
+      localStorage.setItem('user', u.email);
+      console.log(u);
       return u
     } catch (err) {
       console.error('Google sign-in error:', err)

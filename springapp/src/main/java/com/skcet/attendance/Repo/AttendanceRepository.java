@@ -23,4 +23,11 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByClassNameAndSessionDateAndPeriod(String className, String sessionDate, String period);
 
+    // New methods for stats with date
+    int countByStudentEmailAndSessionDate(String studentEmail, String date);
+
+    int countByStudentEmailAndPresentTrueAndSessionDate(String studentEmail, String date);
+
+    int countByStudentEmailAndPresentFalseAndSessionDate(String studentEmail, String date);
+
 }

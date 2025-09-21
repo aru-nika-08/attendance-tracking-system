@@ -4,7 +4,8 @@ public class QRValidateResponse {
     private boolean valid;
     private String sessionId;
     public QRValidateResponse(boolean b, String sessionId2) {
-        //TODO Auto-generated constructor stub
+        this.valid = b;
+        this.sessionId = sessionId2;
     }
     public boolean isValid() {
         return valid;

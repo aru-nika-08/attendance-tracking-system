@@ -79,10 +79,10 @@ public class AttendanceService {
     // ---------------------------
     // 3️⃣ Stats for student
     // ---------------------------
-    public Map<String, Integer> getStatsForStudent(String studentEmail) {
-        int total = repo.countByStudentEmail(studentEmail);
-        int present = repo.countByStudentEmailAndPresentTrue(studentEmail);
-        int absent = repo.countByStudentEmailAndPresentFalse(studentEmail);
+    public Map<String, Integer> getStatsForStudent(String studentEmail , String date) {
+        int total = repo.countByStudentEmailAndSessionDate(studentEmail, date);
+        int present = repo.countByStudentEmailAndPresentTrueAndSessionDate(studentEmail, date);
+        int absent = repo.countByStudentEmailAndPresentFalseAndSessionDate(studentEmail, date);
         int late = 0; // Optional: if you track late separately, implement logic
 
         Map<String, Integer> stats = new HashMap<>();

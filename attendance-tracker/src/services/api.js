@@ -27,7 +27,7 @@ export const attendanceAPI = {
 
   // Fetch student attendance summary
   getStudentAttendance: (email) =>
-    api.get(`/attendance/student/${encodeURIComponent(email)}/summary`),
+    api.get(`/attendance/student/${encodeURIComponent(email)}/summary`, { params: { date: new Date().toISOString().split('T')[0] } }),
 
   // Admin endpoints
   getClassAttendance: (className, date, period) =>

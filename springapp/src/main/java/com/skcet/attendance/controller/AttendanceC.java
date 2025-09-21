@@ -17,18 +17,12 @@ public class AttendanceC {
     @Autowired
     private AttendanceService attendanceService;
 
-    // ---------------------------
-    // 1️⃣ Stats endpoints
-    // ---------------------------
-    @GetMapping("/stats/{studentEmail}")
-    public ResponseEntity<Map<String, Integer>> getStats(@PathVariable String studentEmail) {
-        Map<String, Integer> stats = attendanceService.getStatsForStudent(studentEmail);
-        return ResponseEntity.ok(stats);
-    }
+    
 
     @GetMapping("/student/{studentEmail}/summary")
-    public ResponseEntity<Map<String, Integer>> getStudentSummary(@PathVariable String studentEmail) {
-        Map<String, Integer> stats = attendanceService.getStatsForStudent(studentEmail);
+    public ResponseEntity<Map<String, Integer>> getStudentSummary(@PathVariable String studentEmail , @RequestParam String date) {
+        System.out.println("Fetching stats for student: " + studentEmail + " on date: " + date);
+        Map<String, Integer> stats = attendanceService.getStatsForStudent(studentEmail, date);
         return ResponseEntity.ok(stats);
     }
 

@@ -7,7 +7,9 @@ public class FaceVerifyResponse {
     private String message;
     private double confidence;
     public FaceVerifyResponse(boolean b, String string, double d) {
-        //TODO Auto-generated constructor stub
+        this.success = b;
+        this.message = string;
+        this.confidence = d;
     }
     public boolean isSuccess() {
         return success;

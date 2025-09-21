@@ -173,7 +173,7 @@ const AdminDashboard = () => {
                 onClick={async () => {
                   try {
                     setLoading(true);
-                    await attendanceAPI.markAttendanceToken('727723euit216@skcet.ac.in', qrData.token);
+                    await attendanceAPI.markAttendanceToken(localStorage.getItem('user'), qrData.token);
                     await loadAttendance();
                     alert('Attendance marked!');
                   } catch(err) {

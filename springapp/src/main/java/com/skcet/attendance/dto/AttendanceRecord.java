@@ -13,7 +13,6 @@ public class AttendanceRecord {
     private double confidence;
     public AttendanceRecord(String attendanceId, String email2, String currentUserEmail, String string, String status2,
             LocalDateTime now, String sessionId2, double confidence2) {
-        //TODO Auto-generated constructor stub
     }
     public String getId() {
         return id;
