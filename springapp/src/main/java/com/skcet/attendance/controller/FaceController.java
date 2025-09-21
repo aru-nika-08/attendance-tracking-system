@@ -4,9 +4,7 @@ import com.skcet.attendance.dto.FaceVerifyRequest;
 import com.skcet.attendance.dto.FaceVerifyResponse;
 import com.skcet.attendance.service.AzureFaceService;
 import com.skcet.attendance.service.FirestoreService;
-import com.skcet.attendance.service.TokenService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +17,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@Slf4j
 public class FaceController {
 
     private final AzureFaceService azureFaceService;
