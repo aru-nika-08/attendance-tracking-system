@@ -6,7 +6,6 @@ import com.skcet.attendance.dto.QRValidateRequest;
 import com.skcet.attendance.dto.QRValidateResponse;
 import com.skcet.attendance.service.TokenService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/qr") // ✅ base path for QR endpoints
 @RequiredArgsConstructor
-@Slf4j
 @CrossOrigin(origins = "http://localhost:5173")
 public class QRController {
 

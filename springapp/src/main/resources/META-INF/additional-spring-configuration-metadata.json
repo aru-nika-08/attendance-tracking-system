@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "azure.face.key",
+    "type": "java.lang.String",
+    "description": "A description for 'azure.face.key'"
+  },
+  {
+    "name": "azure.face.endpoint",
+    "type": "java.lang.String",
+    "description": "A description for 'azure.face.endpoint'"
+  },
+  {
+    "name": "firebase.service.account",
+    "type": "java.lang.String",
+    "description": "A description for 'firebase.service.account'"
+  },
+  {
+    "name": "cors.allowed.origin",
+    "type": "java.lang.String",
+    "description": "A description for 'cors.allowed.origin'"
+  },
+  {
+    "name": "server.port",
+    "type": "java.lang.Integer",
+    "description": "A description for 'server.port'"
+  },
+  {
+    "name": "qr.ttl.ms",
+    "type": "java.lang.Long",
+    "description": "A description for 'qr.ttl.ms'"
+  }
+]}

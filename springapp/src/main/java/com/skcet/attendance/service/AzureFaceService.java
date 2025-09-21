@@ -19,12 +19,12 @@ public class AzureFaceService {
     @Value("${azure.face.key:}")
     private String faceKey;
 
-    private final OkHttpClient httpClient = new OkHttpClient.Builder()
+    public final OkHttpClient httpClient = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build();
 
-    private final Gson gson = new Gson();
+    public final Gson gson = new Gson();
 
     public double detectAndVerifyFace(String base64Image, String studentEmail) {
         try {
